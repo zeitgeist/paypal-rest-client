@@ -125,20 +125,23 @@ data Transaction = Transaction
   { transactAmount :: Amount
   , transactDescription :: Maybe String
   , transactItemList :: ItemList
+  , transactInvoiceNumber :: Maybe String
   } deriving (Eq, Show)
 
 instance ToJSON Transaction where
   toJSON trans =
     object (["amount" .= transactAmount trans,
              "item_list" .= transactItemList trans] ++
-            maybeToList (("description" .=) <$> transactDescription trans))
+            maybeToList (("description" .=) <$> transactDescription trans) ++
+            maybeToList (("invoice_number" .=) <$> transactInvoiceNumber trans))
 
 instance FromJSON Transaction where
   parseJSON (Object obj) =
     Transaction <$>
     obj .: "amount" <*>
     obj .:? "description" <*>
-    obj .: "item_list"
+    obj .: "item_list" <*>
+    obj .:? "invoice_number"
   parseJSON _ = mzero
 
 -- |This takes either a string or a number and tries to produce an integer out
