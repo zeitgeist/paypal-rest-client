@@ -141,7 +141,7 @@ execPayPalOpers env@(EnvironmentUrl baseUrl) username password
         -- HTTP request successful.
         Right response -> do
           let statusCode' = response ^. responseStatus . statusCode
-          if statusCode' == 200 then
+          if (statusCode' == 200 || (methodIsPost method && statusCode' == 201)) then
             let responseText = response ^. responseBody
             in case eitherDecode responseText of
               Left errMsg ->
@@ -149,3 +149,6 @@ execPayPalOpers env@(EnvironmentUrl baseUrl) username password
               Right result -> return $ Right (result, latestAccTk)
           else
             return $ Left $ HttpStatusError statusCode'
+  where
+    methodIsPost (UseHttpPost _) = True
+    methodIsPost _ = False
